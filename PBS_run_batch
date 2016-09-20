@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+#PBS -W group_list=yetiphyso
+#PBS -N globe270
+#PBS -q infiniband
+# #PBS -l nodes=8:ib2,walltime=12:00:00
+#PBS -l nodes=8:ib2,walltime=48:00:00
+#PBS -m abe
+
+module load anaconda/2.7.8
+module add intel-parallel-studio/2015
+
+# interval for output
+#NINT=30
+#NINT=90
+NINT=270
+
+BASEDIR=/vega/physo/users/ra2697/global_lagrangian
+cd $BASEDIR
+
+# total number of years in data
+NYEARS=22
+NDAYS=$(( NYEARS * 365 ))
+SECPERDAY=86400
+
+# numerical timestep
+DELTAT=900
+NTIMESTEPS=$(( NINT * SECPERDAY / DELTAT + 1 ))
+
+echo "NDAYS: $NDAYS"
+# extra offset needed to align output files
+extraoffset=302400
+
+DATAROOT=output/int_$(printf '%03d' $NINT)
+mkdir -p $DATAROOT
+
+TMPFILE='tmpfile.bcolz'
+
+for n in $(seq 0 $NINT $NDAYS)
+do
+	cd $BASEDIR
+	nstart=$n
+	nend=$((nstart + NINT))
+	SUFFIX=$(printf '%04d' $nstart)-$(printf '%04d' $nend)
+	DATADIR=$DATAROOT/traj_"$SUFFIX".bcolz
+	if [ ! -e "$DATADIR" ]
+	then
+		echo "$DATADIR not found"
+		RUNDIR=run_$SUFFIX
+		rm -rf $RUNDIR
+		cp -rP run_template $RUNDIR
+		cd $RUNDIR
+		# set the run time correctly
+		sed -i -e "s/nTimeSteps=\\(.*\\)/nTimeSteps=$NTIMESTEPS,/I" data
+		cat data
+		# add appropriate offset to data.off
+		offset=$((extraoffset - (n * SECPERDAY)))
+		echo "offset: $offset"
+		sedarg="s/offlineTimeOffset=\\(.*\\)/offlineTimeOffset=$offset,/I"
+		echo "sedarg: $sedarg"
+		sed -i -e $sedarg data.off
+		echo "*** data.off ***"
+		cat data.off
+		echo "Running MITgcm in $RUNDIR"
+		mpirun -n 128 ./mitgcmuv
+		mv STDOUT.0000 ../log/STDOUT.0000."$RUNDIR"
+		echo "Running floater_convert"
+		floater_convert --output_format=bcolz --keep_fields=npart,time,x,y,vort $TMPFILE &&
+		mv $TMPFILE ../$DATADIR &&
+		cd .. &&
+		rm -rf $RUNDIR &
+	fi
+done
+
+

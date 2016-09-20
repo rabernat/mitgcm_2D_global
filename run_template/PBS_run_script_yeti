@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+#PBS -W group_list=yetiphyso
+#PBS -N globe
+#PBS -q infiniband
+#PBS -l nodes=8:ib2,walltime=2:00:00
+#PBS -m abe
+
+RUNDIR=$PBS_O_WORKDIR
+
+echo "Running MITgcm in $RUNDIR"
+cd $RUNDIR
+
+module add intel-parallel-studio/2015
+
+rm *.data *.meta STD*
+
+mpirun -n 128 ./mitgcmuv
+
+# floater_convert --progress --output_format=bcolz --keep_fields=npart,time,x,y,vort trajectories_fewer_fields.bcolz
+

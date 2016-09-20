@@ -1,0 +1,20 @@
+ &OFFLINE_PARM01
+  UvelFile= '/vega/physo/projects/global_tracer/avisoDUACS2014_0.1_degree-msla-corr-renamed/uvelCorr',
+  VvelFile= '/vega/physo/projects/global_tracer/avisoDUACS2014_0.1_degree-msla-corr-renamed/vvelCorr',
+  UMeanFile='/vega/physo/projects/global_tracer/avisoDUACS2014_0.1_degree-mdt-corr/uvelCorr.0000000001.data'
+  VMeanFile='/vega/physo/projects/global_tracer/avisoDUACS2014_0.1_degree-mdt-corr/vvelCorr.0000000001.data'
+&
+
+ &OFFLINE_PARM02
+  offlineLoadPrec=32,
+  offlineIter0=0,
+# one day
+  deltaToffline=86400.,
+# 3.5 days
+  offlineTimeOffset=302400.0,
+# 8 days
+  offlineForcingPeriod=604800.,
+# turn off cycling
+  offlineForcingCycle=0.,
+ &
+
