@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+#PBS -W group_list=yetiphyso
+#PBS -q infiniband
+#PBS -N sss_aviso
+#PBS -l nodes=2:ib2,walltime=24:00:00
+#PBS -m abe
+
+RUNDIR=$PBS_O_WORKDIR
+
+echo "Running MITgcm in $RUNDIR"
+cd $RUNDIR
+rm *.meta
+rm *.data
+rm STD*
+
+module add intel-parallel-studio/2015
+mpirun -n 32 ./mitgcmuv
+

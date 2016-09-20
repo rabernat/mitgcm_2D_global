@@ -1,0 +1,25 @@
+ &OFFLINE_PARM01
+  UvelFile='../../avisoDUACS2014_0.1_degree-msla/uvel'
+  VvelFile='../../avisoDUACS2014_0.1_degree-msla/vvel'
+#  UvelFile= '../../aviso_0.1_degree-msla_new/uvelCorr',
+#  VvelFile= '../../aviso_0.1_degree-msla_new/vvelCorr',
+#  UMeanFile='../../meanflow/aviso_ud-corr.data',
+#  VMeanFile='../../meanflow/aviso_vd-corr.data', 
+ &
+
+ &OFFLINE_PARM02
+  offlineLoadPrec=32,
+  offlineIter0=0,
+  offlineOffsetIter=0,
+  deltaToffline=2.,
+  offlineForcingPeriod=2.,
+# 2278 files
+  offlineForcingCycle=2278.,
+#  deltaToffline=604800.,
+#  offlineForcingPeriod=604800.,
+# 17 years (364 day years)
+#  offlineForcingCycle=534643200.,
+# this would turn off cycling
+# offlineForcingCycle=0.,
+ &
+

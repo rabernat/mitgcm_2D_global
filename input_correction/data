@@ -1,0 +1,54 @@
+# ====================
+# | Model parameters |
+# ====================
+#
+# Continuous equation parameters
+ &PARM01
+ tempStepping=.FALSE.,
+ saltStepping=.FALSE.,
+ useSingleCpuIO=.TRUE.,
+ &
+#
+# Elliptic solver parameters
+ &PARM02
+ cg2dMaxIters=1000,
+ cg2dTargetResidual=1.E-13,
+ &
+#
+# Time stepping parameters
+ &PARM03
+ nIter0 = 0,
+# 1 year = 31449600 s
+# nTimeSteps = 34944,
+# 4 years
+# nTimeSteps = 139776,
+# 17 years
+# nTimeSteps=594048,
+ nTimeSteps = 2280,
+#
+ deltaTtracer = 1.0,
+ deltaTclock = 1.0,
+# deltaTtracer= 900.0,
+# deltaTClock = 900.0,
+ pChkptFreq=0.,
+ chkptFreq= 0.,
+ dumpFreq=  0.,
+ taveFreq=  0.,
+ monitorFreq= 1.0,
+ &
+#
+# Gridding parameters
+ &PARM04
+ usingCartesianGrid=.FALSE.,
+ usingSphericalPolarGrid=.TRUE.,
+ delX=3600*0.1,
+ delY=1600*0.1,
+ delZ=100.,
+ ygOrigin=-80.,
+ xgOrigin=0.0,
+ &
+#
+# Input datasets
+ &PARM05
+ bathyFile='bathy.bin',
+ &
