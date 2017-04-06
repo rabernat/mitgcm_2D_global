@@ -119,12 +119,19 @@ C-    read actual number of floats from file
 
       IF ( ioUnit.GT.0 .AND. mapIniPos2Index ) THEN
 C--   Found a global file
-        WRITE(msgBuf,'(A,2I4,A,1P2E15.8)')
-     &    ' bi,bj=', bi, bj, ' , npart,max_npart=', tmp(1), tmp(6)
+C-------Start Nathaniel Hack----------------------
+        IF (flt_npart.EQ.0 ) THEN
+          npart_read = NINT(tmp(1))
+        ELSE
+          npart_read = flt_npart
+        ENDIF
+
+        WRITE(msgBuf,'(A,2I4,A,I4)')
+     &' bi,bj=', bi, bj, ' , npart=', npart_read
         CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      &                       SQUEEZE_RIGHT, myThid )
-        npart_read = NINT(tmp(1))
         max_npart  = tmp(6)
+C-----------------End Hack-----------------------
         DO ip=1,npart_read
 C-    read individual float position from file
           CALL MDS_READVEC_LOC( fn, fp, ioUnit,

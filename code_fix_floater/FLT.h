@@ -50,6 +50,7 @@ C           for returning to the surface is called in the profiling routine
 C           flt_int_prof has to be the minimum of all iup(max_npart).
 C           The subsampling of profiles can be done later in the analysis.
 
+
       _RL flt_noise, flt_deltaT
       _RL flt_int_traj, flt_int_prof
       INTEGER FLT_Iter0
@@ -70,9 +71,14 @@ C     flt_file    :: name of the file containing the initial positions.
 C                    At initialization the program first looks for a
 C                    global file flt_file.data. If that is not found it
 C                    looks for tiled files flt_file.iG.jG.data.
-      CHARACTER*(MAX_LEN_FNAM) flt_file
-      COMMON / FLT_PARAM_C / flt_file
+C-------Start Nathaniel Hack ---------------------
+C        flt_npart       :: integer number of floats in flt_file
 
+      INTEGER flt_npart
+      CHARACTER*(MAX_LEN_FNAM) flt_file
+      COMMON / FLT_PARAM_C /
+     &       flt_file, flt_npart
+C---------End Nathaniel Hack-----------------------
 C     mapIniPos2Index :: convert float initial position to (local) index map
       LOGICAL mapIniPos2Index
       COMMON / FLT_PARAM_L / mapIniPos2Index
