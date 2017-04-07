@@ -126,8 +126,8 @@ C-------Start Nathaniel Hack----------------------
           npart_read = flt_npart
         ENDIF
 
-        WRITE(msgBuf,'(A,2I4,A,I4)')
-     &' bi,bj=', bi, bj, ' , npart=', npart_read
+        WRITE(msgBuf,'(A,2I4,A,I10)')
+     &' bi,bj=', bi, bj, ' ,hacked npart_read=', npart_read
         CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      &                       SQUEEZE_RIGHT, myThid )
         max_npart  = tmp(6)
