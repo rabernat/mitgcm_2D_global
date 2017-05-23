@@ -6,9 +6,9 @@
  flt_int_prof =  0.0,
  flt_noise    = 0.0,
  flt_selectTrajOutp = 3,
-# flt_file     = 'flt_ini_pos.epac.32deg.bin',
+ flt_file     = 'flt_ini_pos.epac.32deg.bin',
 # flt_file     = 'flt_ini_pos.epac.16deg.bin',
 # flt_file     = 'flt_ini_pos_hex.epac.16deg.bin',
- flt_file     = 'flt_ini_pos_hex.epac.32deg.bin',
+# flt_file     = 'flt_ini_pos_hex.epac.32deg.bin',
  &
 
