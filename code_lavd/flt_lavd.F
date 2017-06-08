@@ -44,88 +44,85 @@ C     === Local Variables ===
       INTEGER bi, bj
       INTEGER ip, kp
       INTEGER i, j
-      _RL ix, jy, i0x, j0y
+      _RL ix, jy 
       
 C     relative vorticity on float position
       _RL vo
 C     relative vorticity (Eulerian field)
-      _RL vort3(1-OLx:sNx+OLx, 1-OLy:sNy+OLy, Nr)
+      _RL vort3(1-OLx:sNx+OLx, 1-OLy:sNy+OLy, Nr, nSx, nSy)
       _RS hFacZ(1-OLx:sNx+OLx, 1-OLy:sNy+OLy)
       _RS r_hFacZ(1-OLx:sNx+OLx,1-OLy:sNy+OLy)
       
-C     the global mean vort and inst. vorticity deviation 
-      _RL mean_vort 
+C     the global mean vort at depth Nr  and inst. vorticity deviation 
+      _RL mean_vort(Nr) 
       _RL ivd
 
       CHARACTER*(MAX_LEN_MBUF) msgBuf
 
-#ifdef ALLOW_EXCH2
-      INTEGER nT
-#endif
 CEOP
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
+C--   loop over all the subgrids and compute the vorticity field
+      
       DO bj=myByLo(myThid),myByHi(myThid)
        DO bi=myBxLo(myThid),myBxHi(myThid)
 
-#ifdef ALLOW_EXCH2
-         nT = W2_myTileList(bi,bj)
-         i0x = DFLOAT( exch2_txGlobalo(nT) - 1 )
-         j0y = DFLOAT( exch2_tyGlobalo(nT) - 1 )
-#else
-         i0x = DFLOAT( myXGlobalLo-1 + (bi-1)*sNx )
-         j0y = DFLOAT( myYGlobalLo-1 + (bj-1)*sNy )
-#endif
          IF ( flt_selectTrajOutp.GE.3 ) THEN
 C --     Calculate relative vorticity
            DO kp = 1,Nr
              CALL MOM_CALC_HFACZ( bi,bj,kp,hFacZ,r_hFacZ,myThid )
              CALL MOM_CALC_RELVORT3( bi, bj, kp,
      &                                 uVel, vVel, hFacZ,
-     &                                 vort3(1-OLx,1-OLy,kp),
+     &                                 vort3(1-OLx,1-OLy,kp, bi, bj),
      &                                 myThid)
              DO j=1-OLy,sNy+OLy
               DO i=1-OLx,sNx+OLx
                 IF ( hFacZ(i,j).EQ.0. ) THEN
-                  vort3(i,j,kp)  = 0. _d 0
+                  vort3(i,j,kp,bi,bj)  = 0. _d 0
                 ENDIF
               ENDDO
              ENDDO
            ENDDO
          ENDIF
+       ENDDO
+      ENDDO
 
-C use new subroutine to compute area-weighted average
-C     SUBROUTINE COMPUTE_GLOBAL_MEAN_RL(
-C     I                myNr, arr, arrMask, arrArea,
-C     I                mean, bi, bj,
-C     I                ,myTime, myThid)
-         
-         CALL COMPUTE_GLOBAL_MEAN_RL(kp, vort3, maskInC, rA,
-     &        mean_vort, 1, 1, myTime, myThid)
 
-C output global mean to STDOUT for reference          
-         WRITE(msgBuf,'(A,F)')
-     &        'global mean vorticity =', mean_vort
-         CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
-     &                       SQUEEZE_RIGHT, myThid )
-        
-         DO ip=1,npart_tile(bi,bj)
+
+C--   use subroutine written by NET  to compute area-weighted average
+C--   over all processes and tiles for each depth level kp
+C--   for reference, the declaration is 
+C--   SUBROUTINE GLOBAL_TILE_MEAN_RL (
+C--   I                myNr, arr, arrMask, arrArea,
+C--   I                myTime, myThid,
+C--   O                meanOut)
+      
+      DO kp = 1,Nr
+         CALL GLOBAL_TILE_MEAN_RL(kp, vort3, maskInC, rA,
+     &        myTime, myThid, mean_vort(kp))
+C--  output global mean to STDOUT for reference
+C         WRITE(msgBuf,'(A,I,A,F)')
+C     &    'at kp=',kp,' global mean vorticity =', mean_vort(kp)
+C         CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
+C     &                       SQUEEZE_RIGHT, myThid )
+      ENDDO
+
+C--   loop over all subgrids and compute lavd for each particle
+      DO bj=myByLo(myThid),myByHi(myThid)
+       DO bi=myBxLo(myThid),myBxHi(myThid)
+        DO ip=1,npart_tile(bi,bj)
             ix = ipart(ip,bi,bj)
             jy = jpart(ip,bi,bj)
             kp = NINT(kpart(ip,bi,bj))
               
-C-- RPA+NET hack: calculate relative vorticity and lavd
-            CALL FLT_BILINEAR(ix,jy,vo,vort3, kp, 4,1,1,myThid)
-            
-C-- mean_vort is currently buggy, so we set to zero as tmp fix 
-            mean_vort = 0
-            ivd = ABS(vo-mean_vort) 
+            CALL FLT_BILINEAR(ix,jy,vo,vort3, kp, 4,bi,bj,myThid)
+
+            ivd = ABS(vo-mean_vort(kp)) 
 
             lavd(ip,bi,bj) = ( ivd*flt_deltaT +
      &      (myTime - flt_deltaT)*lavd(ip,bi,bj) )/myTime
-         ENDDO
-
+        ENDDO
        ENDDO
       ENDDO
 

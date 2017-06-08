@@ -49,12 +49,12 @@ C     !LOCAL VARIABLES:
       INTEGER ip, kp, ii
       INTEGER i, j
       INTEGER iG, jG
-      _RL ix, jy, i0x, j0y, xx, yy, zz
+      _RL ix, jy,  xx, yy, zz
       _RL uu, vv, tt, ss, pp
 C     relative vorticity on float position
       _RL vo
 C     relative vorticity (Eulerian field)
-      _RL vort3(1-OLx:sNx+OLx, 1-OLy:sNy+OLy, Nr)
+      _RL vort3(1-OLx:sNx+OLx, 1-OLy:sNy+OLy, Nr, nSx, nSy)
       _RS hFacZ(1-OLx:sNx+OLx, 1-OLy:sNy+OLy)
       _RS r_hFacZ(1-OLx:sNx+OLx,1-OLy:sNy+OLy)
           
@@ -103,26 +103,26 @@ C--   Calculate position + other fields at float position and fill up IO-buffer
       DO bj=myByLo(myThid),myByHi(myThid)
        DO bi=myBxLo(myThid),myBxHi(myThid)
 
-#ifdef ALLOW_EXCH2
-         nT = W2_myTileList(bi,bj)
-         i0x = DFLOAT( exch2_txGlobalo(nT) - 1 )
-         j0y = DFLOAT( exch2_tyGlobalo(nT) - 1 )
-#else
-         i0x = DFLOAT( myXGlobalLo-1 + (bi-1)*sNx )
-         j0y = DFLOAT( myYGlobalLo-1 + (bj-1)*sNy )
-#endif
+C#ifdef ALLOW_EXCH2
+C         nT = W2_myTileList(bi,bj)
+C         i0x = DFLOAT( exch2_txGlobalo(nT) - 1 )
+C         j0y = DFLOAT( exch2_tyGlobalo(nT) - 1 )
+C#else
+C         i0x = DFLOAT( myXGlobalLo-1 + (bi-1)*sNx )
+C         j0y = DFLOAT( myYGlobalLo-1 + (bj-1)*sNy )
+C#endif
          IF ( flt_selectTrajOutp.GE.3 ) THEN
 C --     Calculate relative vorticity
            DO kp = 1,Nr
              CALL MOM_CALC_HFACZ( bi,bj,kp,hFacZ,r_hFacZ,myThid )
              CALL MOM_CALC_RELVORT3( bi, bj, kp,
      &                                 uVel, vVel, hFacZ,
-     &                                 vort3(1-OLx,1-OLy,kp),
+     &                                 vort3(1-OLx,1-OLy,kp, bi, bj),
      &                                 myThid)
              DO j=1-OLy,sNy+OLy
               DO i=1-OLx,sNx+OLx
                 IF ( hFacZ(i,j).EQ.0. ) THEN
-                  vort3(i,j,kp)  = 0. _d 0
+                  vort3(i,j,kp, bi, bj)  = 0. _d 0
                 ENDIF
               ENDDO
              ENDDO
@@ -178,7 +178,7 @@ C              tmp(12) = tt
 C              tmp(13) = ss
               
 C-- RPA hack: calculate relative vorticity
-            CALL FLT_BILINEAR(ix,jy,vo,vort3, kp, 4,1,1,myThid)
+            CALL FLT_BILINEAR(ix,jy,vo,vort3, kp, 4,bi,bj,myThid)
             tmp(7) = vo
              
               
@@ -190,7 +190,7 @@ C              tmp(12) = flt_nan
 C              tmp(13) = flt_nan
 C              tmp(14) = flt_nan
 C            ENDIF
-C---Nathaniel Hack:output lavd
+C---Nathaniel Hack: output lavd
             tmp(8) = lavd(ip,bi,bj)
             DO ii=1,nFlds
               flt_io_buff(ii,ip,bi,bj) = tmp(ii)
@@ -220,6 +220,11 @@ C--   Write shared buffer to file
      &           myIter, '.', iG, '.', jG, '.csv' 
            OPEN(33333, FILE=fn, ACCESS='APPEND', ACTION='WRITE',
      &          STATUS='REPLACE')
+C-- write out header           
+           WRITE(33333, '(9A)') 
+     &          'npart,', 'time,', 'x,', 'y,', 'z,', 'u,', 'v,',
+     &          'vort,', 'lavd'
+C-- write out data
            DO ip=1,npart_tile(bi,bj)
              WRITE(33333, '(I, 99(A, E))') npart(ip,bi,bj),
      &                (',', flt_io_buff(ii,ip,bi,bj), ii=1, nFlds)

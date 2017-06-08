@@ -159,7 +159,7 @@ C              npart( npart_tile(bi,bj),bi,bj) = tmp(1)
               iup(   npart_tile(bi,bj),bi,bj) = tmp(7)
               itop(  npart_tile(bi,bj),bi,bj) = tmp(8)
               tend(  npart_tile(bi,bj),bi,bj) = tmp(9)
-              lavd(  npart_tile(bi,bj),bi,bj) = 99.0
+              lavd(  npart_tile(bi,bj),bi,bj) = 0.0
               
            ENDIF
             ENDIF
