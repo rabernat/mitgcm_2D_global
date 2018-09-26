@@ -31,13 +31,13 @@ mpirun -n 128 ./mitgcmuv
 
 # this should be something like 2010-05-01
 CODE=$( basename $( pwd ) )
-PICKLEPATH="../../pkl_files/flt_ini_pos_rec.global.32deg_f4.pk"
+PICKLEPATH="../../pkl_files/flt_ini_pos_rec.global.32deg_f4.pkl"
 module add anaconda/3-4.4.0
 source activate floater
 floater_convert --output_format netcdf --ref_time $CODE --pkl_path $PICKLEPATH ../../float_trajectories_lavd/$CODE
 
 # clean up the run but keep the main log file
 mv STDOUT.0000 tmp
-rm *.data *.meta STD*
+rm *.data *.meta STD* *.csv
 mv tmp STDOUT.0000
 
