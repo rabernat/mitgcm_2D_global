@@ -1,0 +1,25 @@
+name: floater
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.6
+  - pip
+  - numpy
+  - scipy
+  - pandas
+  - xarray
+  - dask
+  - distributed
+  - bottleneck
+  - numba
+  - scikit-image
+  - pytest
+  - future
+  - mpi4py
+  - h5py
+  - h5netcdf
+  - netcdf4
+  - pip:
+    - tqdm
+    - git+https://github.com/rabernat/floater.git
