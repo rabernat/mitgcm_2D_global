@@ -211,8 +211,7 @@ C--   For initial condition only, convert coordinates to index map:
              ENDIF
 C     not a global file: assume that all particles from this tiled-file
 C     belong to this current tile (=> do not no check)
-C             npart(ip,bi,bj)  = tmp(1)
-             npart(ip,bi,bj) = ip
+             npart(ip,bi,bj)  = tmp(1)
              tstart(ip,bi,bj) = tmp(2)
              ipart(ip,bi,bj)  = ix
              jpart(ip,bi,bj)  = jy
@@ -221,6 +220,7 @@ C             npart(ip,bi,bj)  = tmp(1)
              iup(  ip,bi,bj)  = tmp(7)
              itop( ip,bi,bj)  = tmp(8)
              tend( ip,bi,bj)  = tmp(9)
+             lavd( ip,bi,bj) = 0.0
            ENDDO
            CLOSE( ioUnit )
 
